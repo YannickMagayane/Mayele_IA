@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/down
+# Description: Stop Mayele IA platform services.
+# ==============================================================================
+
+set -e
+
+echo "=== Stopping Mayele IA Platform Services ==="
+
+if command -v docker-compose &> /dev/null; then
+    docker-compose down || true
+fi
+
+pkill -f "manage.py runserver" || true
+
+echo "=== Mayele IA services stopped successfully ==="

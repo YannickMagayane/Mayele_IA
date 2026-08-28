@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/test
+# Description: Execute isolated unit test suite for Mayele IA.
+# ==============================================================================
+
+set -e
+
+echo "=== Running Mayele IA Isolated Unit Test Suite ==="
+./venv/bin/python manage.py test authentication analyzer data_pipeline "$@"

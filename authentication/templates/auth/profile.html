@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-950 text-slate-100">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil & Quota | Mayele IA Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        mayele: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            dark: '#030712',
+                            card: '#0b1329'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <!-- Top Navigation Header -->
+    <header
+        class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <a href="{% url 'chat' %}" class="flex items-center gap-3 group">
+            <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-amber-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span
+                    class="text-xl font-bold font-heading bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">Mayele
+                    IA</span>
+                <span class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase">Congo Intelligence
+                    Hub</span>
+            </div>
+        </a>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard' %}"
+                class="px-3.5 py-2 text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60 rounded-xl transition flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                </svg>
+                Tableau de Bord
+            </a>
+            <a href="{% url 'chat' %}"
+                class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+                <span>← Retour au Chat</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6">
+
+        <!-- User Identity Hero Card -->
+        <div
+            class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-2xl">
+            <!-- Background Glow Decorator -->
+            <div
+                class="absolute -top-16 -right-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none">
+            </div>
+
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="flex items-center gap-5">
+                    <div class="relative">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-amber-500 text-white border-2 border-indigo-400/40 flex items-center justify-center font-bold font-heading text-3xl uppercase shadow-xl">
+                            {{ user.username|slice:":2" }}
+                        </div>
+                        <span
+                            class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-950 rounded-full"
+                            title="Compte Actif"></span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-bold font-heading text-white">{{ user.username }}</h1>
+                            <span
+                                class="px-3 py-0.5 bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-xs font-bold rounded-full uppercase tracking-wider">
+                                {{ profile.get_role_display }}
+                            </span>
+                        </div>
+                        <p class="text-slate-400 text-sm flex items-center gap-2">
+                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {{ user.email|default:"Adresse e-mail non renseignée" }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 self-end md:self-auto">
+                    <a href="{% url 'logout' %}"
+                        class="px-4 py-2.5 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 font-semibold border border-rose-800/80 rounded-xl transition text-xs flex items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quota & Usage Analytics Card -->
+        <div class="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-xl space-y-6"
+            x-data="{ used: {{ profile.tokens_used_today }}, total: {{ profile.daily_quota }} }">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Quota Quotidien & Garde-Fou Sécurité
+                    </h2>
+                    <p class="text-xs text-slate-400">Suivi en temps réel de votre consommation d'ingestion RAG et
+                        requêtes Gemini</p>
+                </div>
+                <span
+                    class="px-3 py-1 bg-emerald-950/80 border border-emerald-700/60 text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Système Opérationnel
+                </span>
+            </div>
+
+            <!-- Stats Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/90 shadow-inner space-y-1">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Quota Total
+                        Alloué</span>
+                    <div class="flex items-baseline justify-between">
+                        <p class="text-2xl font-bold font-heading text-white">{{ profile.daily_quota }}</p>
+                        <span class="text-xs text-slate-500">req/jour</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/90 shadow-inner space-y-1">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Consommées
+                        Aujourd'hui</span>
+                    <div class="flex items-baseline justify-between">
+                        <p class="text-2xl font-bold font-heading text-amber-400">{{ profile.tokens_used_today }}</p>
+                        <span class="text-xs text-amber-500/80">requêtes</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/90 shadow-inner space-y-1">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Solde Restant</span>
+                    <div class="flex items-baseline justify-between">
+                        <p class="text-2xl font-bold font-heading text-emerald-400">{{ remaining_quota }}</p>
+                        <span class="text-xs text-emerald-500/80">disponibles</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Progress Bar -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs font-semibold">
+                    <span class="text-slate-400">Taux d'utilisation du Quota</span>
+                    <span class="text-indigo-400 font-bold">
+                        {% widthratio profile.tokens_used_today profile.daily_quota 100 %}%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-500 h-full rounded-full transition-all duration-500 shadow-lg shadow-indigo-500/50"
+                        style="width: {% widthratio profile.tokens_used_today profile.daily_quota 100 %}%;"></div>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-500 pt-1">
+                    <span>Réinitialisation automatique chaque jour à 00h00 GMT</span>
+                    <span>Dernier reset : {{ profile.last_quota_reset|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capabilities & Role Permissions Card -->
+        <div class="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-6 md:p-8 space-y-4">
+            <h3 class="text-lg font-bold font-heading text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Privilèges & Accès Ingestion
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-4 bg-slate-950/40 rounded-xl border border-slate-800/60 flex items-start gap-3">
+                    <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Recherche Web Dynamique (Google CSE)</span>
+                        <span class="text-slate-400">Scraping autonome en temps réel sur les opportunités et marchés en
+                            RDC.</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-950/40 rounded-xl border border-slate-800/60 flex items-start gap-3">
+                    <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Accès au Vector Store ChromaDB</span>
+                        <span class="text-slate-400">Recherche sémantique instantanée et triangulation des sources
+                            vérifiées.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+
+</html>

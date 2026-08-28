@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/logs
+# Description: Stream Mayele IA application and docker logs.
+# ==============================================================================
+
+if command -v docker-compose &> /dev/null && [ "$(docker-compose ps -q 2>/dev/null)" ]; then
+    docker-compose logs -f --tail=100
+else
+    tail -f -n 100 data_pipeline/staging_cache/*.log 2>/dev/null || echo "Listening for live application logs..."
+fi

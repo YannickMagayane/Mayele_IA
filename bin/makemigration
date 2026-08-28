@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/makemigration
+# Description: Generate Django migration files for schema definitions.
+# ==============================================================================
+
+set -e
+
+echo "=== Generating Django Migration Files ==="
+./venv/bin/python manage.py makemigrations "$@"
+echo "[+] Migration files generated successfully."

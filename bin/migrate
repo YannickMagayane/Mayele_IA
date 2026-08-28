@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/migrate
+# Description: Initialize and synchronize database tables and seed initial data.
+# ==============================================================================
+
+set -e
+
+echo "=== Initializing Mayele IA SQLite Database & Seed Data ==="
+./venv/bin/python bin/init_db.py
+echo "[+] Database schema and seed data synchronized successfully."

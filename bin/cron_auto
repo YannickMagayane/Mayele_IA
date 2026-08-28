@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/cron_auto
+# Description: Automated cron execution wave (00h00 / 12h00 bi-daily trigger).
+# ==============================================================================
+
+set -e
+
+echo "[$(date)] Launching Automated Bi-Daily Ingestion Wave (00h00 / 12h00)..."
+./venv/bin/python data_pipeline/cron_orchestrator.py
+echo "[$(date)] Ingestion Wave Finished."

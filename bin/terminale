@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/terminale
+# Description: Open an interactive bash shell in the virtual environment or container.
+# ==============================================================================
+
+if command -v docker-compose &> /dev/null && [ "$(docker-compose ps -q web 2>/dev/null)" ]; then
+    docker-compose exec web bash
+else
+    source ./venv/bin/activate
+    exec bash --rcfile <(echo "source ./venv/bin/activate; PS1='(Mayele-IA) \u@\h:\w\$ '")
+fi

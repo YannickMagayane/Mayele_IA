@@ -1,0 +1,123 @@
+{% extends 'analyzer/base.html' %}
+
+{% block title %}Analytique Territoriale | Mayele IA RDC{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto bg-slate-50">
+    <!-- Header Summary Card -->
+    <div
+        class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-full mb-3">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Analytique Territoriale RDC
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+                Cartographie de l'Emploi & Projets Stratégiques
+            </h1>
+            <p class="text-xs md:text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">
+                Visualisation des données d'emploi minières et industrielles triangulées sur Kinshasa, Lubumbashi,
+                Kolwezi et Goma.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span
+                class="px-4 py-2 bg-slate-100 border border-slate-300 text-slate-800 font-mono text-xs font-bold rounded-xl shadow-2xs">
+                📊 {{ total_sources }} Sources Valides
+            </span>
+        </div>
+    </div>
+
+    <!-- Territory Breakdown Cards (Kinshasa, Lubumbashi, Kolwezi, Goma) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {% for stat in territory_stats %}
+        <div
+            class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:border-emerald-500 transition">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ stat.territory }}</span>
+                <span
+                    class="w-2.5 h-2.5 rounded-full {% if stat.territory == 'Kolwezi' %}bg-amber-500{% else %}bg-emerald-500{% endif %}"></span>
+            </div>
+            <div>
+                <span class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ stat.total_jobs }}</span>
+                <span class="text-xs font-medium text-slate-500 block mt-1">Offres Recensées</span>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span class="text-slate-500 font-medium">Attractivité :</span>
+                <span class="font-mono font-bold text-emerald-700 text-sm">
+                    {{ stat.avg_investment|floatformat:1 }}/10
+                </span>
+            </div>
+        </div>
+        {% empty %}
+        <div
+            class="col-span-4 bg-white p-8 rounded-2xl text-center text-slate-400 text-xs font-semibold border border-slate-200">
+            Initialisation des statistiques territoriales...
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Analytics Charts & Demand Heatmap Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Demand Distribution by Sector -->
+        <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl space-y-5 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+                Répartition des Offres par Secteur
+            </h3>
+            <div class="space-y-4">
+                {% for sec in sector_stats %}
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-1.5">
+                        <span class="text-slate-700">{{ sec.sector }}</span>
+                        <span class="font-mono text-emerald-700">{{ sec.total_jobs }} opportunités</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                        <div class="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                            style="width: {% widthratio sec.total_jobs 200 100 %}%;"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-xs text-slate-400 italic">Données en cours d'indexation...</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Triangulated Facts Stream -->
+        <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl space-y-5 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Faits Structurés Certifiés
+            </h3>
+            <div class="space-y-3.5 max-h-96 overflow-y-auto pr-1">
+                {% for fact in recent_facts %}
+                <div
+                    class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 hover:border-emerald-500 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-900">
+                            {{ fact.entity_name }} ({{ fact.territory }})
+                        </span>
+                        <span
+                            class="px-2.5 py-0.5 text-[9px] font-bold rounded-full uppercase border {% if fact.verification_status == 'verified' %}bg-emerald-100 text-emerald-800 border-emerald-300{% else %}bg-rose-100 text-rose-800 border-rose-300{% endif %}">
+                            {{ fact.get_verification_status_display }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-600 font-medium leading-relaxed">{{ fact.summary }}</p>
+                </div>
+                {% empty %}
+                <p class="text-xs text-slate-400 italic">Aucun fait triangulé pour le moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

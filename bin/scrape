@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/scrape
+# Description: Trigger manual web discovery and scraping wave for Mayele IA.
+# ==============================================================================
+
+set -e
+
+echo "=== Triggering Manual Web Scraping & Ingestion Wave ==="
+./venv/bin/python data_pipeline/cron_orchestrator.py "$@"
+echo "=== Web Scraping Completed Successfully ==="

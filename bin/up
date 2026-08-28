@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: bin/up
+# Description: Launch Mayele IA platform services in Docker or local mode.
+# ==============================================================================
+
+set -e
+
+echo "=== Launching Mayele IA Platform ==="
+
+if command -v docker-compose &> /dev/null && [ "$1" == "--docker" ]; then
+    echo "[+] Starting Docker Compose & Traefik Proxy..."
+    docker-compose up -d --build
+    echo "[+] Mayele IA is online at http://localhost"
+else
+    echo "[+] Initializing SQLite database schema..."
+    ./venv/bin/python bin/init_db.py
+    echo "[+] Starting local Django server on http://127.0.0.1:8000..."
+    ./venv/bin/python manage.py runserver 0.0.0.0:8000
+fi

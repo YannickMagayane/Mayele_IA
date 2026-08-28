@@ -1,0 +1,345 @@
+{% extends 'analyzer/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Assistant Chat | Mayele IA RDC{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-slide-up {
+        animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+
+<div class="flex-1 flex w-full h-full overflow-hidden bg-slate-50">
+    <!-- LEFT SIDEBAR: Conversation History -->
+    <aside
+        class="w-80 bg-white border-r border-slate-200 flex flex-col justify-between hidden md:flex shrink-0 shadow-sm">
+        <div class="p-4 space-y-4 flex-1 flex flex-col overflow-hidden">
+            <!-- New Chat Button -->
+            <button onclick="window.location.reload();"
+                class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Nouvelle Conversation</span>
+            </button>
+
+            <!-- Search in History -->
+            <div class="relative">
+                <input type="text" id="history-search" placeholder="Rechercher dans l'historique..."
+                    onkeyup="filterHistory(this.value)"
+                    class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition font-medium">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+
+            <!-- Conversation Threads List -->
+            <div class="flex-1 overflow-y-auto space-y-1.5 pr-1" id="history-list">
+                <div class="flex items-center justify-between px-1 mb-2">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Historique des
+                        Échanges</span>
+                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">RDC</span>
+                </div>
+
+                {% for msg in messages %}
+                <div onclick="scrollToMsg('msg-{{ msg.id }}')"
+                    class="history-item p-3 rounded-xl hover:bg-slate-50 border border-slate-100 hover:border-slate-200 cursor-pointer transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span
+                            class="text-xs font-bold text-slate-800 group-hover:text-indigo-600 truncate block max-w-[170px]">
+                            {{ msg.prompt }}</span>
+                        <span class="text-[9px] font-mono text-slate-400 font-semibold">
+                            {{ msg.created_at|date:"H:i" }}
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 line-clamp-1 font-normal leading-normal">
+                        {{ msg.response_text|striptags }}</p>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center text-xs text-slate-400 italic">
+                    {% if user.is_authenticated %}
+                    Aucun historique récent. Posez votre première question.
+                    {% else %}
+                    Mode Invité : vos échanges sont temporaires. Connectez-vous pour conserver un historique permanent.
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quota Widget at Bottom (Calculated for Auth & Guest Users) -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>Quota Quotidien {% if not user.is_authenticated %}(Invité){% endif %}</span>
+                <span id="sidebar-quota-display" class="font-mono text-indigo-600 font-bold">
+                    {{ remaining_quota }} / {{ daily_quota }} req
+                </span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                <div id="sidebar-progress-bar"
+                    class="bg-gradient-to-r from-indigo-600 to-indigo-500 h-full transition-all"
+                    style="width: {{ usage_percentage }}%;">
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CENTER CHAT CANVAS -->
+    <div class="flex-1 flex flex-col justify-between bg-white h-full overflow-hidden relative shadow-sm">
+        <!-- Messages Display Timeline -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full">
+
+            <!-- Clean Header Card -->
+            <div
+                class="bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></div>
+                    <span class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider">Mayele IA •
+                        Intelligence Stratégique RDC</span>
+                </div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
+                    Plateforme d'Analyse Économique & Industrielle
+                </h1>
+                <p class="text-xs md:text-sm text-slate-600 mt-1.5 leading-relaxed font-medium">
+                    Posez toute question d'analyse économique, minière, législative et industrielle. Le moteur agentique
+                    RAG triangule les données de façon autonome avec précision.
+                </p>
+            </div>
+
+            <!-- Existing Messages in History -->
+            {% for msg in messages %}
+            <!-- User Prompt Bubble -->
+            <div id="msg-{{ msg.id }}" class="flex flex-col items-end mb-6 animate-slide-up">
+                <div class="bg-indigo-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-none max-w-2xl shadow-sm">
+                    <p class="text-xs md:text-sm font-medium leading-relaxed whitespace-pre-wrap">{{ msg.prompt }}</p>
+                </div>
+                <div class="flex items-center justify-end gap-2.5 mt-1 mr-1">
+                    <button onclick="copyToClipboard(this.getAttribute('data-text'), this)"
+                        data-text="{{ msg.prompt|escapejs }}" title="Copier la question"
+                        class="text-[10px] text-slate-400 hover:text-indigo-600 font-semibold flex items-center gap-1 transition cursor-pointer">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                        <span>Copier</span>
+                    </button>
+                    <button onclick="editPrompt(this.getAttribute('data-text'))" data-text="{{ msg.prompt|escapejs }}"
+                        title="Modifier la question"
+                        class="text-[10px] text-slate-400 hover:text-indigo-600 font-semibold flex items-center gap-1 transition cursor-pointer">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Modifier</span>
+                    </button>
+                    <span class="text-[10px] text-slate-400 font-mono font-semibold">• {{ msg.created_at|date:"H:i"
+                        }}</span>
+                </div>
+            </div>
+
+            <!-- Mayele AI Response Bubble -->
+            <div class="flex flex-col items-start mb-8 animate-slide-up">
+                <div class="flex items-center gap-2 mb-2">
+                    <div
+                        class="w-7 h-7 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
+                        M
+                    </div>
+                    <span class="text-xs font-extrabold text-slate-800">Mayele IA</span>
+                </div>
+
+                <div
+                    class="bg-white border border-slate-200 p-6 rounded-2xl rounded-tl-none max-w-3xl shadow-sm space-y-4 text-slate-800 text-xs md:text-sm leading-relaxed w-full">
+                    <div class="prose prose-slate max-w-none space-y-2">
+                        {{ msg.response_text|clean_markdown }}
+                    </div>
+                </div>
+
+                <!-- Action Bar: Copier & Réessayer -->
+                <div class="flex items-center gap-2 mt-2 ml-1">
+                    <button onclick="copyToClipboard(this.getAttribute('data-text'), this)"
+                        data-text="{{ msg.response_text|escapejs }}" title="Copier la réponse"
+                        class="text-[11px] text-slate-600 hover:text-indigo-600 font-bold flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-indigo-50 rounded-lg transition cursor-pointer border border-slate-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                        <span>Copier</span>
+                    </button>
+                    <button onclick="retryPrompt(this.getAttribute('data-text'))" data-text="{{ msg.prompt|escapejs }}"
+                        title="Régénérer la réponse"
+                        class="text-[11px] text-slate-600 hover:text-indigo-600 font-bold flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-indigo-50 rounded-lg transition cursor-pointer border border-slate-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Réessayer</span>
+                    </button>
+                    <span class="text-[10px] text-slate-400 font-mono font-semibold ml-2">• {{ msg.created_at|date:"H:i"
+                        }}</span>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Dynamic HTMX Insertion Container -->
+            <div id="new-messages-target"></div>
+        </div>
+
+        <!-- HTMX Prompt Bar with Auto-Expanding Multiline Textarea -->
+        <div class="p-4 bg-white border-t border-slate-200 shadow-lg">
+            <div class="max-w-4xl mx-auto space-y-2">
+                <form id="chat-form" hx-post="{% url 'chat_query' %}" hx-target="#new-messages-target"
+                    hx-swap="beforeend" hx-indicator="#loading-indicator" class="relative flex items-end">
+                    {% csrf_token %}
+
+                    <textarea id="prompt-input" name="prompt" rows="1" required autocomplete="off"
+                        placeholder="Posez votre question à l'assistant d'intelligence économique..."
+                        class="w-full pl-5 pr-28 py-3.5 bg-slate-50 border border-slate-300/80 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition text-xs md:text-sm font-semibold shadow-inner resize-none max-h-40 overflow-y-auto leading-relaxed"></textarea>
+
+                    <button type="submit" id="send-btn"
+                        class="absolute right-2.5 bottom-2.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl shadow-md transition flex items-center gap-1.5 text-xs uppercase tracking-wider cursor-pointer shrink-0">
+                        <span>Envoyer</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Sleek Minimal Loading Indicator -->
+                <div id="loading-indicator"
+                    class="htmx-indicator flex items-center gap-2.5 text-xs text-indigo-700 font-bold px-2 py-1">
+                    <svg class="animate-spin w-4 h-4 text-indigo-600 shrink-0" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <span>Mayele formule votre réponse...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('chat-form');
+        const textarea = document.getElementById('prompt-input');
+
+        // Auto-expand textarea height dynamically as text wraps onto new lines
+        function adjustTextareaHeight() {
+            textarea.style.height = 'auto';
+            const newHeight = Math.min(textarea.scrollHeight, 160);
+            textarea.style.height = newHeight + 'px';
+        }
+
+        textarea.addEventListener('input', adjustTextareaHeight);
+
+        // Allow ENTER key to submit form, Shift+Enter for new line
+        textarea.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (textarea.value.trim() !== '') {
+                    form.requestSubmit();
+                }
+            }
+        });
+
+        // Clear input box and reset height when request starts
+        form.addEventListener('htmx:beforeRequest', function () {
+            setTimeout(function () {
+                textarea.value = '';
+                textarea.style.height = 'auto';
+            }, 20);
+        });
+
+        // Auto scroll down when new response arrives
+        form.addEventListener('htmx:afterRequest', function (evt) {
+            if (evt.detail.successful) {
+                textarea.value = '';
+                textarea.style.height = 'auto';
+                const container = document.getElementById('chat-messages');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+        });
+    });
+
+    // Helper: Copy text to clipboard with instant visual feedback
+    function copyToClipboard(text, btnEl) {
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function () {
+            const span = btnEl.querySelector('span');
+            const originalText = span ? span.innerText : 'Copier';
+            if (span) span.innerText = 'Copié !';
+            btnEl.classList.add('text-emerald-600');
+            setTimeout(function () {
+                if (span) span.innerText = originalText;
+                btnEl.classList.remove('text-emerald-600');
+            }, 2000);
+        }).catch(function (err) {
+            console.error('Failed to copy: ', err);
+        });
+    }
+
+    // Helper: Edit user prompt (loads into textarea and focuses)
+    function editPrompt(promptText) {
+        const textarea = document.getElementById('prompt-input');
+        if (textarea) {
+            textarea.value = promptText;
+            textarea.focus();
+            textarea.dispatchEvent(new Event('input'));
+            textarea.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Helper: Retry prompt (loads into textarea and submits form)
+    function retryPrompt(promptText) {
+        const textarea = document.getElementById('prompt-input');
+        const form = document.getElementById('chat-form');
+        if (textarea && form) {
+            textarea.value = promptText;
+            textarea.dispatchEvent(new Event('input'));
+            form.requestSubmit();
+        }
+    }
+
+    function scrollToMsg(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function filterHistory(query) {
+        const items = document.querySelectorAll('.history-item');
+        query = query.toLowerCase();
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (text.includes(query)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}
