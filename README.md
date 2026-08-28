@@ -53,8 +53,8 @@ assistant_IA/
 ### 1. Cloner le Projet & Préparer l'Environnement
 
 ```bash
-git clone <repository_url>
-cd assistant_IA
+git clone https://github.com/YannickMagayane/Mayele_IA.git
+cd Mayele_IA
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

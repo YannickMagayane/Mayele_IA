@@ -20,10 +20,15 @@ import re
 import urllib.parse
 from typing import Dict, Any, List
 import requests
+import urllib3
 from bs4 import BeautifulSoup
 import pypdf
 
+# Suppress unverified HTTPS warnings for government sites with self-signed SSL
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 logger = logging.getLogger(__name__)
+
 
 
 class WebScraper:

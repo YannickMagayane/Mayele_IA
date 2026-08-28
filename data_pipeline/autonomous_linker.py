@@ -252,18 +252,22 @@ class AutonomousLinker:
         collected = []
         logger.info(f"[DiscoverAll] Starting full scrape of {len(self.DIRECT_TARGET_URLS)} registered targets")
 
-        with ThreadPoolExecutor(max_workers=8) as pool:
+        with ThreadPoolExecutor(max_workers=12) as pool:
             futures = {pool.submit(self._scrape_single, url): url for url in self.DIRECT_TARGET_URLS}
-            for future in as_completed(futures, timeout=150):
-                url = futures[future]
-                try:
-                    docs = future.result()
-                    if docs:
-                        collected.extend(docs)
-                        logger.info(f"[DiscoverAll] ✅ {url[:50]} → {len(docs)} document(s) extracted")
-                except Exception as exc:
-                    logger.warning(f"[DiscoverAll] ❌ {url}: {exc}")
+            try:
+                for future in as_completed(futures, timeout=45):
+                    url = futures[future]
+                    try:
+                        docs = future.result()
+                        if docs:
+                            collected.extend(docs)
+                            logger.info(f"[DiscoverAll] ✅ {url[:50]} → {len(docs)} document(s) extracted")
+                    except Exception as exc:
+                        logger.warning(f"[DiscoverAll] ❌ {url}: {exc}")
+            except TimeoutError:
+                logger.info(f"[DiscoverAll] Timeout reached (45s). Returning {len(collected)} collected documents.")
 
         logger.info(f"[DiscoverAll] Complete: {len(collected)} document(s) scraped from {len(self.DIRECT_TARGET_URLS)} targets")
+
         return collected
 
