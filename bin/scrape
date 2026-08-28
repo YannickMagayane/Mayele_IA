@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: bin/scrape
-# Description: Trigger manual web discovery and scraping wave for Mayele IA.
+# Description: Trigger manual web & PDF scraping wave for Mayele IA RDC.
 # ==============================================================================
 
 set -e
 
-echo "=== Triggering Manual Web Scraping & Ingestion Wave ==="
-./venv/bin/python data_pipeline/cron_orchestrator.py "$@"
-echo "=== Web Scraping Completed Successfully ==="
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$SCRIPT_DIR"
+
+echo "=== [Mayele IA] Triggering Manual Web & PDF Scraping Wave ==="
+./venv/bin/python manage.py run_scraping_pipeline "$@"
+echo "=== [Mayele IA] Scraping Wave Completed Successfully ==="

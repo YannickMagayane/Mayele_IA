@@ -5,7 +5,7 @@
 [![Vector Engine](https://img.shields.io/badge/ChromaDB-VectorDB-FF6F61?style=for-the-badge)](https://www.trychroma.com/)
 [![Frontend](https://img.shields.io/badge/HTMX%20%2B%20Tailwind-CDN-007ACC?style=for-the-badge)](https://htmx.org/)
 [![Author](https://img.shields.io/badge/Auteur-Yannick%20Magayane-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/yannick-magayane-8509ba1ab/)
-[![Email Contact](https://img.shields.io/badge/Contact-Email-EA4335?style=for-the-badge&logo=gmail)](mailto:magayaneyannick@gmail.com)
+[![Email Contact](https://img.shields.io/badge/Contact-Email-EA4335?style=for-the-badge&logo=gmail)](mailto:yannickmagayaneyannick@gmail.com)
 
 **Mayele IA** est une plateforme souveraine et agentique d'intelligence économique, législative et minière spécialisée sur la **République Démocratique du Congo (RDC)** et l'Afrique. Elle triangule de façon autonome les données officielles et médiatiques via un pipeline de scraping direct multi-thread et un moteur **RAG (Retrieval-Augmented Generation)** avancé.
 
@@ -95,9 +95,10 @@ Conçu et développé par **Yannick Magayane**.
   <a href="https://www.linkedin.com/in/yannick-magayane-8509ba1ab/">
     <img src="https://img.shields.io/badge/LinkedIn-Yannick%20Magayane-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
   </a>
-  <a href="mailto:magayaneyannick@gmail.com">
-    <img src="https://img.shields.io/badge/Email-magayaneyannick%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
+  <a href="mailto:yannickmagayaneyannick@gmail.com">
+    <img src="https://img.shields.io/badge/Email-yannickmagayaneyannick%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
   </a>
+
 </p>
 
 ---
